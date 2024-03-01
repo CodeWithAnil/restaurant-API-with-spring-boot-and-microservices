@@ -26,6 +26,8 @@ import com.example.orderservice.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 @Service
@@ -42,7 +44,7 @@ public class OrderService {
 //	private final ApplicationEventPublisher applicationEventPublisher;
 
 
-	public void placeOrder(OrderRequest orderRequest) {
+	public void placeOrder(OrderRequest orderRequest)  {
 		Order order = new Order();
 		order.setOrderNumber(UUID.randomUUID().toString());
 
@@ -63,24 +65,28 @@ public class OrderService {
 		//		this.observationRegistry);
 		//inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
 		//return inventoryServiceObservation.observe(() -> {
-			InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
+		InventoryResponse[] inventoryResponseArray;
+
+			 inventoryResponseArray = webClientBuilder.build().get()
 					.uri("http://inventory-service/api/inventory",
 							uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
-					.retrieve()
-					.bodyToMono(InventoryResponse[].class)
-					.block();
+					.retrieve().bodyToMono(InventoryResponse[].class).block();
 
 			boolean allProductsInStock = Arrays.stream(inventoryResponseArray)
 					.allMatch(InventoryResponse::isInStock);
 
 			if (allProductsInStock) {
-				orderRepository.save(order);
+			 orderRepository.save(order);
 				// publish Order Placed Event
 				//applicationEventPublisher.publishEvent(new OrderPlacedEvent(this, order.getOrderNumber()));
 				//return "Order Placed";
 			} else {
 				throw new IllegalArgumentException("Product is not in stock, please try again later");
 			}
+
+
+
+
 
 
 	}
