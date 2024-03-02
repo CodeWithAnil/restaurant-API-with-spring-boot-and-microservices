@@ -1,6 +1,7 @@
 package com.example.inventoryservice.controller;
 
 import com.example.inventoryservice.dto.InventoryResponse;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inventory")
 @RequiredArgsConstructor
+
 public class InventoryController {
      
 	private final InventoryService inventoryService;
@@ -22,6 +24,7 @@ public class InventoryController {
 	// http://localhost:8082/api/inventory?skuCode=iphone-13&skuCode=iphone13-red
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
+	@LoadBalanced
 	public List<InventoryResponse> isInStock(@RequestParam List<String> skuCode) {
 		return inventoryService.isInStock(skuCode);
 	}
